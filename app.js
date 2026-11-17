@@ -20,6 +20,21 @@ const displayDate = s => {const d=parse(s);return d?`${String(d.getDate()).padSt
 const readDate = s => {const d=parse(s);return d?iso(d):'';};
 const addDays = (d,n) => {const x=new Date(d);x.setDate(x.getDate()+n);return x};
 const addMonths = (d,n) => {const x=new Date(d);const day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+n);const last=new Date(x.getFullYear(),x.getMonth()+1,0).getDate();x.setDate(Math.min(day,last));return x};
+
+function formatDateTyping(value){
+  const digits=String(value||'').replace(/\D/g,'').slice(0,8);
+  if(digits.length<=2)return digits;
+  if(digits.length<=4)return `${digits.slice(0,2)}/${digits.slice(2)}`;
+  return `${digits.slice(0,2)}/${digits.slice(2,4)}/${digits.slice(4)}`;
+}
+document.addEventListener('input',e=>{
+  const target=e.target;
+  if(target.id==='birth'||target.matches('#blocks input[data-field="start"]')){
+    const formatted=formatDateTyping(target.value);
+    if(target.value!==formatted)target.value=formatted;
+  }
+});
+
 const familyTotal = () => $('family').value === 'MONOPARENTAL' ? 32 : 19;
 
 let blocks = [{id:1,type:'period',weeks:6,start:''}];
@@ -134,6 +149,15 @@ function renderBlocks(){
       } else {
         const raw=e.target.value, val=readDate(raw);
         if(raw&&!val){alert('Introduce la fecha con formato DD/MM/AAAA.');e.target.value=displayDate(b.start);return;}
+        if(b.type==='pebbles'&&val){
+          const birth=parse($('birth').value);
+          const latest=birth?addDays(addMonths(birth,12),-7):null;
+          if(!birth||parse(val)>latest){
+            alert(`El Plan Pebbles debe comenzar, como máximo, el ${fmt(latest)} (una semana antes de que el bebé cumpla un año).`);
+            e.target.value=displayDate(b.start);
+            return;
+          }
+        }
         b.start=val;
       }
       renderBlocks();updateTotals();
@@ -185,12 +209,22 @@ $('blocks').addEventListener('click',e=>{
       alert('Introduce la fecha de nacimiento con formato DD/MM/AAAA.');
       $('birth').value='';
     }
+    const changedBirth=parse($('birth').value);
+    if(id==='birth'&&changedBirth){
+      const latestPebbles=addDays(addMonths(changedBirth,12),-7);
+      for(const b of blocks.filter(x=>x.type==='pebbles')){
+        if(b.start&&parse(b.start)>latestPebbles){
+          b.start='';
+          alert('La fecha del Plan Pebbles se ha borrado porque debe comenzar, como máximo, una semana antes de que el bebé cumpla un año.');
+        }
+      }
+    }
     $('nine-inline').textContent=fmt(parse($('birth').value)?addMonths(parse($('birth').value),9):null);
     renderBlocks();
   });
 });
 $('reduction').addEventListener('change',()=>{$('reduction-fields').hidden=$('reduction').value!=='SI';renderBlocks();});
-$('birth').value='12/10/2026';
+$('birth').value='08/10/2026';
 $('reduction-fields').hidden=true;
 $('nine-inline').textContent=fmt(addMonths(parse($('birth').value),9));
 renderBlocks();
