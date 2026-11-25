@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#009640">
-<meta name="description" content="Calculadora de permiso por nacimiento, lactancia y plan Pebbles.">
+<meta name="description" content="Calculadora de permiso por nacimiento y lactancia.">
 <title>Calculadora de nacimiento y adopción | Fetico Moderno</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -25,7 +25,7 @@
       <div class="field"><label for="shift">Turno</label><select id="shift">
         <option>X1</option><option>X2</option><option>X3</option><option>X4</option><option>X5</option><option>X6</option><option>X7</option><option>X8</option><option>X9</option><option>X10</option>
       </select></div>
-      <div class="field"><label for="family">Tipo de familia</label><select id="family"><option value="BIPARENTAL">Biparental — 19 semanas</option><option value="MONOPARENTAL">Monoparental — 32 semanas</option></select></div>
+      <div class="field"><label for="family">Tipo de familia</label><select id="family"><option value="BIPARENTAL">Biparental — 20 semanas</option><option value="MONOPARENTAL">Monoparental — 34 semanas</option></select></div>
       <div class="field birth-field"><label for="birth">Fecha de nacimiento del bebé</label><input id="birth" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" value="12/10/2026" autocomplete="off"><div class="nine-months-panel"><span>EL BEBÉ CUMPLE 9 MESES</span><strong id="nine-inline">—</strong></div></div>
       <div class="field"><label for="reduction">¿Tienes reducción de jornada?</label><select id="reduction"><option value="NO">No</option><option value="SI">Sí</option></select></div>
     </div>
@@ -36,7 +36,7 @@
     <div class="kpis">
       <div class="kpi"><span>Semanas disfrutadas</span><strong id="total-used">6 / 19</strong></div>
       <div class="kpi"><span>Semanas disponibles</span><strong id="total-left">13</strong></div>
-      <div class="kpi"><span>Duración del permiso</span><strong id="total-duration">19 / 32</strong></div>
+      <div class="kpi"><span>Duración del permiso</span><strong id="total-duration">20 semanas</strong></div>
     </div>
   </section>
 
@@ -46,7 +46,6 @@
     <div class="actions block-actions">
       <button class="primary" id="add-period" type="button">Añadir periodo</button>
       <button class="primary" id="add-lact" type="button">Añadir lactancia</button>
-      <button class="primary" id="add-pebbles" type="button">Añadir Pebbles</button>
     </div>
   </section>
   <span id="lact-status" hidden></span>

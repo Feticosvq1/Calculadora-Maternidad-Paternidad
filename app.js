@@ -35,7 +35,7 @@ document.addEventListener('input',e=>{
   }
 });
 
-const familyTotal = () => $('family').value === 'MONOPARENTAL' ? 32 : 19;
+const familyTotal = () => $('family').value === 'MONOPARENTAL' ? 34 : 20;
 
 let blocks = [{id:1,type:'period',weeks:6,start:''}];
 let nextBlockId = 2;
@@ -48,10 +48,6 @@ const blockEnd = (b, previousEnd=null) => {
     const st=b.id===1?parse($('birth').value):parse(b.start);
     const w=Number(b.weeks)||0;
     return st&&w>0?addDays(st,w*7-1):null;
-  }
-  if(b.type==='pebbles'){
-    const st=parse(b.start);
-    return st?addDays(st,7):null;
   }
   if(b.type==='lact'){
     return calculateLact(b, previousEnd).end;
@@ -129,14 +125,6 @@ function renderBlocks(){
           <div class="kpi"><span>Días naturales</span><strong>${r.start&&r.end?Math.max(0,Math.round((r.end-r.start)/86400000)):'—'}</strong></div>
         </div>
         <div class="result">Jornada diaria considerada: <strong>${r.daily?r.daily.toLocaleString('es-ES',{maximumFractionDigits:2})+' h':'—'}</strong><br>Reincorporación del bloque anterior: <strong>${fmt(r.referenceReturn)}</strong><br>Fecha en que cumple 9 meses: <strong>${fmt(r.nine)}</strong></div>`;
-    } else {
-      const end=results.get(b.id).end;
-      card.innerHTML=`
-        <div class="period-head"><h3>Plan Pebbles</h3><div class="block-controls"><button class="remove" type="button" data-remove="${b.id}">Quitar</button></div></div>
-        <div class="grid">
-          <div class="field"><label>Fecha de inicio del plan Pebbles</label><input data-field="start" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA" value="${displayDate(b.start)}"></div>
-          <div class="field"><label>Fecha de finalización</label><div class="result"><strong>${fmt(end)}</strong></div></div>
-        </div>`;
     }
     card.addEventListener('change',e=>{
       const field=e.target.dataset.field;
@@ -149,15 +137,6 @@ function renderBlocks(){
       } else {
         const raw=e.target.value, val=readDate(raw);
         if(raw&&!val){alert('Introduce la fecha con formato DD/MM/AAAA.');e.target.value=displayDate(b.start);return;}
-        if(b.type==='pebbles'&&val){
-          const birth=parse($('birth').value);
-          const latest=birth?addDays(addMonths(birth,12),-7):null;
-          if(!birth||parse(val)>latest){
-            alert(`El Plan Pebbles debe comenzar, como máximo, el ${fmt(latest)} (una semana antes de que el bebé cumpla un año).`);
-            e.target.value=displayDate(b.start);
-            return;
-          }
-        }
         b.start=val;
       }
       renderBlocks();updateTotals();
@@ -166,7 +145,6 @@ function renderBlocks(){
   });
   $('add-period').disabled=periodCount()>=4||usedWeeks()>=familyTotal();
   $('add-lact').disabled=blocks.some(b=>b.type==='lact');
-  $('add-pebbles').disabled=blocks.some(b=>b.type==='pebbles')||usedWeeks()<familyTotal();
   updateTotals();
 }
 function updateTotals(){
@@ -177,13 +155,11 @@ function updateTotals(){
 function addBlock(type){
   if(type==='period'&&(periodCount()>=4||usedWeeks()>=familyTotal()))return;
   if(type==='lact'&&blocks.some(b=>b.type==='lact'))return;
-  if(type==='pebbles'&&(blocks.some(b=>b.type==='pebbles')||usedWeeks()<familyTotal()))return;
   blocks.push({id:nextBlockId++,type,weeks:0,start:''});
   renderBlocks();
 }
 $('add-period').addEventListener('click',()=>addBlock('period'));
 $('add-lact').addEventListener('click',()=>addBlock('lact'));
-$('add-pebbles').addEventListener('click',()=>addBlock('pebbles'));
 $('blocks').addEventListener('click',e=>{
   const removeBtn=e.target.closest('button[data-remove]');
   if(removeBtn){
@@ -210,15 +186,6 @@ $('blocks').addEventListener('click',e=>{
       $('birth').value='';
     }
     const changedBirth=parse($('birth').value);
-    if(id==='birth'&&changedBirth){
-      const latestPebbles=addDays(addMonths(changedBirth,12),-7);
-      for(const b of blocks.filter(x=>x.type==='pebbles')){
-        if(b.start&&parse(b.start)>latestPebbles){
-          b.start='';
-          alert('La fecha del Plan Pebbles se ha borrado porque debe comenzar, como máximo, una semana antes de que el bebé cumpla un año.');
-        }
-      }
-    }
     $('nine-inline').textContent=fmt(parse($('birth').value)?addMonths(parse($('birth').value),9):null);
     renderBlocks();
   });
